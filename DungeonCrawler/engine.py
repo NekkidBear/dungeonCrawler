@@ -1,7 +1,4 @@
-from character import PlayerCharacter
+from character import BaseCharacter
 
-player = PlayerCharacter().generate_character()
-
-
-
-
+player = BaseCharacter.generate_player_character()
+print(player)
