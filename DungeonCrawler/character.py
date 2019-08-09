@@ -1,4 +1,4 @@
-import races
+from races import *
 from random import randint
 
 
@@ -6,7 +6,8 @@ class BaseCharacter:
     stats = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]
 
     def __init__(self, x, y, name, race, xp, level, hp, archetype, strength, dexterity, constitution, intelligence,
-                 wisdom, charisma,  skills=None):
+                 wisdom, charisma,  racial_str_bonus, racial_dex_bonus, racial_const_bonus, racial_int_bonus,
+                 racial_wis_bonus, racial_char_bonus, skills=None):
         self.x = x
         self.y = y
         self.name = name
@@ -14,19 +15,25 @@ class BaseCharacter:
         self.xp = xp
         self.level = level
         self.hp = hp
-        self.strength = strength
-        self.dexterity = dexterity
-        self.constitution = constitution
-        self.intelligence = intelligence
-        self.wisdom = wisdom
-        self.charisma = charisma
+        self.strength = strength + racial_str_bonus
+        self.dexterity = dexterity + racial_dex_bonus
+        self.constitution = constitution + racial_const_bonus
+        self.intelligence = intelligence + racial_int_bonus
+        self.wisdom = wisdom + racial_wis_bonus
+        self.charisma = charisma + racial_char_bonus
+        self.racial_str_bonus = racial_str_bonus
+        self.racial_dex_bonus = racial_dex_bonus
+        self.racial_const_bonus = racial_const_bonus
+        self.racial_int_bonus = racial_int_bonus
+        self.racial_wis_bonus = racial_wis_bonus
+        self.racial_char_bonus = racial_char_bonus
         self.archetype = archetype
         self.skills = skills
-        self.strength_modifier = 0
-        self.dexterity_modifier = 0
-        self.intelligence_modifier = 0
-        self.wisdom_modifier = 0
-
+        self.strength_modifier = self.determine_modifiers(self.strength)
+        self.dexterity_modifier = self.determine_modifiers(self.dexterity)
+        self.intelligence_modifier = self.determine_modifiers(self.intelligence)
+        self.wisdom_modifier = self.determine_modifiers(self.wisdom)
+        self.charisma_modifier = self.determine_modifiers(self.charisma)
         self.strength_saving_throw = None
         self. dexterity_saving_throw = None
         self.constitution_saving_throw = None
@@ -66,11 +73,13 @@ class BaseCharacter:
         print("Every adventurer needs a name. How would you like to be known?")
         cls.name = input("Name: ")
         print("What race are you?")
+        print(", ".join(races_constant))
         cls.race = input("Race: ")
-        if cls.race not in races.races_constant:
-            print("I'm not familiar with that race. Pick from " + str([r for r in races.races_constant]))
+        if cls.race not in races_constant:
+            print("I'm not familiar with that race. Pick from " + ", ".join(races_constant))
             print("Who are your people?")
             cls.race = input("Race: ")
+        get_racial_bonus(cls.race)
         print("What kind of an adventurer are you--Rogue, Cleric, Wizard, Ranger, Paladin, Barbarian?")
         cls.archetype = input("Class: ")
         print("How would you like to determine your stats? a) roll for them, or b) standard array numbers?")
@@ -109,9 +118,49 @@ class BaseCharacter:
                 assigned[s] = value
                 values.remove(int(value))
                 print("Remaining values: " + str(list(values)))
-        # Calculate bonuses and saving throws
-
         return cls(0, 0, cls.name, cls.race, 0, 1, 0, cls.archetype,  **assigned)
+
+    @classmethod
+    def determine_modifiers(cls, stat):
+        stat = stat
+        stat_modifier = 0
+        if stat >= 30:
+            stat_modifier = +10
+        elif stat in [28, 29]:
+            stat_modifier = +9
+        elif stat in [26, 27]:
+            stat_modifier = +8
+        elif stat in [24, 25]:
+            stat_modifier = +7
+        elif stat in [22, 23]:
+            stat_modifier = +6
+        elif stat in [20, 21]:
+            stat_modifier = +5
+        elif stat in [18, 19]:
+            stat_modifier = +4
+        elif stat in [16, 17]:
+            stat_modifier = +3
+        elif stat in [14, 15]:
+            stat_modifier = +2
+        elif stat in [12, 13]:
+            stat_modifier = +1
+        elif stat in [10, 11]:
+            stat_modifier = 0
+        elif stat in [8, 9]:
+            stat_modifier = -1
+        elif stat in [6, 7]:
+            stat_modifier = -2
+        elif stat in [4, 5]:
+            stat_modifier = -3
+        elif stat in [2, 3]:
+            stat_modifier = -4
+        else:
+            stat_modifier = -5
+        return stat_modifier
+
+    @classmethod
+    def determine_saving_throws(cls):
+        pass
 
     def __repr__(self):
         return f"""Character Stats
@@ -124,4 +173,12 @@ class BaseCharacter:
         INT:    {self.intelligence}
         WISD:   {self.wisdom}
         CHAR:   {self.charisma}
+
+        Racial Bonuses
+        STR bonus:      {self.racial_str_bonus}
+        DEX bonus:      {self.racial_dex_bonus}
+        CONST bonus:    {self.racial_const_bonus}
+        INT bonus:      {self.racial_int_bonus}
+        WISD bonus:     {self.racial_wis_bonus}
+        CHAR bonus:     {self.racial_char_bonus}
 """
