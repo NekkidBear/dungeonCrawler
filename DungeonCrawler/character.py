@@ -6,8 +6,8 @@ class BaseCharacter:
     stats = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]
 
     def __init__(self, x, y, name, race, xp, level, hp, archetype, strength, dexterity, constitution, intelligence,
-                 wisdom, charisma,  racial_str_bonus, racial_dex_bonus, racial_const_bonus, racial_int_bonus,
-                 racial_wis_bonus, racial_char_bonus, skills=None):
+                 wisdom, charisma,  racial_str_bonus=0, racial_dex_bonus=0, racial_const_bonus=0, racial_int_bonus=0,
+                 racial_wis_bonus=0, racial_char_bonus=0, skills=None):
         self.x = x
         self.y = y
         self.name = name
@@ -118,7 +118,8 @@ class BaseCharacter:
                 assigned[s] = value
                 values.remove(int(value))
                 print("Remaining values: " + str(list(values)))
-        return cls(0, 0, cls.name, cls.race, 0, 1, 0, cls.archetype,  **assigned)
+        return cls(0, 0, cls.name, cls.race, 0, 1, 0, cls.archetype, racial_str_bonus, racial_dex_bonus,
+                   racial_const_bonus, racial_int_bonus, racial_wis_bonus, racial_char_bonus, **assigned)
 
     @classmethod
     def determine_modifiers(cls, stat):
