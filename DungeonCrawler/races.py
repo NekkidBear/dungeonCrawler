@@ -1,13 +1,4 @@
-races_constant = ["Dragonborn",
-                  "Dwarf",
-                  "Elf",
-                  "Gnome",
-                  "Half-Elf",
-                  "Halfling",
-                  "Half-orc",
-                  "Human",
-                  "Tiefling"
-                  ]
+races_constant = ["Dragonborn", "Dwarf", "Elf", "Gnome", "Half-Elf", "Halfling", "Half-orc", "Human", "Tiefling"]
 
 
 class Race:
@@ -52,20 +43,15 @@ class Gnome(Race):
 
 
 class HalfElf(Race):
-    def __init__(self, stat_1, stat_2):
+    def __init__(self):
         super().__init__(self)
         self.name = "Half-Elf"
         self.racial_char_bonus = +2
-        if stat_1 == "strength" or stat_2 == "strength":
-            self.racial_str_bonus = +1
-        elif stat_1 == "dexterity" or stat_2 == "dexterity":
-            self.racial_dex_bonus = +1
-        elif stat_1 == "intelligence" or stat_2 == "intelligence":
-            self.racial_int_bonus = +1
-        elif stat_1 == "constitution" or stat_2 == "constitution":
-            self.racial_const_bonus = +1
-        elif stat_1 == "wisdom" or stat_2 == "wisdom":
-            self.racial_wis_bonus = +1
+        self.racial_str_bonus = +1
+        self.racial_dex_bonus = +1
+        self.racial_int_bonus = +1
+        self.racial_const_bonus = +1
+        self.racial_wis_bonus = +1
 
 
 class Halfling(Race):
@@ -103,43 +89,80 @@ class Tiefling(Race):
         self.racial_char_bonus = +2
 
 
-def get_racial_bonus(race):
+def get_racial_bonus(race, stat):
     race = race
-    racial_str_bonus = 0
-    racial_dex_bonus = 0
-    racial_int_bonus = 0
-    racial_const_bonus = 0
-    racial_wis_bonus = 0
-    racial_char_bonus = 0
+    stat = stat
+    racial_bonus = 0
     if race == "Dragonborn":
-        racial_str_bonus = Dragonborn().racial_str_bonus
-        racial_char_bonus = Dragonborn().racial_char_bonus
+        if stat == "strength":
+            racial_bonus = Dragonborn().racial_str_bonus
+        elif stat == "charisma":
+            racial_bonus = Dragonborn().racial_char_bonus
+        else:
+            pass
     elif race == "Dwarf":
-        racial_const_bonus = Dwarf().racial_const_bonus
+        if stat == "constitution":
+            racial_bonus = Dwarf().racial_const_bonus
+        else:
+            pass
     elif race == "Elf":
-        racial_dex_bonus = Elf().racial_dex_bonus
+        if stat == "dexterity":
+            racial_bonus = Elf().racial_dex_bonus
+        else:
+            pass
     elif race == "Gnome":
-        racial_int_bonus = Gnome().racial_int_bonus
+        if stat == "intelligence":
+            racial_bonus = Gnome().racial_int_bonus
+        else:
+            pass
     elif race == "Half-Elf":
-        racial_str_bonus = HalfElf("", "").racial_str_bonus
-        racial_dex_bonus = HalfElf("", "").racial_dex_bonus
-        racial_int_bonus = HalfElf("", "").racial_int_bonus
-        racial_const_bonus = HalfElf("", "").racial_const_bonus
-        racial_wis_bonus = HalfElf("", "").racial_wis_bonus
-        racial_char_bonus = HalfElf("", "").racial_char_bonus
+        if stat == "charisma":
+            racial_bonus = HalfElf().racial_char_bonus
+        elif stat == "strength" and (half_elf_choice_1 == "strength" or half_elf_choice_2 == "strength"):
+            racial_bonus = HalfElf().racial_str_bonus
+        elif stat == "dexterity" and (half_elf_choice_1 == "dexterity" or half_elf_choice_2 == "dexterity"):
+            racial_bonus = HalfElf().racial_dex_bonus
+        elif stat == "intelligence" and (half_elf_choice_1 == "intelligence" or half_elf_choice_2 == "intelligence"):
+            racial_bonus = HalfElf().racial_int_bonus
+        elif stat == "constitution" and (half_elf_choice_1 == "constitution" or half_elf_choice_2 == "constitution"):
+            racial_bonus = HalfElf().racial_const_bonus
+        elif stat == "wisdom" and (half_elf_choice_1 == "wisdom" or half_elf_choice_2 == "wisdom"):
+            racial_bonus = HalfElf().racial_dex_bonus
+        else:
+            pass
     elif race == "Halfling":
-        racial_dex_bonus = Halfling().racial_dex_bonus
+        if stat == "dexterity":
+            racial_bonus = Halfling().racial_dex_bonus
+        else:
+            pass
     elif race == "Half-Orc":
-        racial_str_bonus = HalfOrc().racial_str_bonus
-        racial_const_bonus = HalfOrc().racial_const_bonus
+        if stat == "strength":
+            racial_bonus = HalfOrc().racial_str_bonus
+        elif stat == "constitution":
+            racial_bonus = HalfOrc().racial_const_bonus
+        else:
+            pass
     elif race == "Human":
-        racial_str_bonus = Human().racial_str_bonus
-        racial_dex_bonus = Human().racial_dex_bonus
-        racial_int_bonus = Human().racial_int_bonus
-        racial_const_bonus = Human().racial_const_bonus
-        racial_wis_bonus = Human().racial_wis_bonus
-        racial_char_bonus = Human().racial_char_bonus
+        if stat == "strength":
+            racial_bonus = Human().racial_str_bonus
+        elif stat == "dexterity":
+            racial_bonus = Human().racial_dex_bonus
+        elif stat == "constitution":
+            racial_bonus = Human().racial_const_bonus
+        elif stat == "intelligence":
+            racial_bonus = Human().racial_int_bonus
+        elif stat == "wisdom":
+            racial_bonus = Human().racial_wis_bonus
+        elif stat == "charisma":
+            racial_bonus = Human().racial_char_bonus
+        else:
+            pass
     elif race == "Tiefling":
-        racial_int_bonus = Tiefling().racial_int_bonus
-        racial_char_bonus = Tiefling().racial_char_bonus
-    return racial_str_bonus, racial_dex_bonus, racial_int_bonus, racial_const_bonus, racial_wis_bonus, racial_char_bonus
+        if stat == "intelligence":
+            racial_bonus = Tiefling().racial_int_bonus
+        elif stat == "charisma":
+            racial_bonus = Tiefling().racial_char_bonus
+        else:
+            pass
+
+    return racial_bonus
