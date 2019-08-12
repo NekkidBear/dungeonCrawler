@@ -2,11 +2,14 @@ from races import *
 from random import randint
 
 
+
 class BaseCharacter:
     stats = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]
+    races_dict = {"dragon-born": DragonBorn(), "dwarf": Dwarf(), "elf": Elf(), "gnome": Gnome(), "half-elf": HalfElf(),
+                  "halfling": Halfling(), "half-orc": HalfOrc(), "human": Human(), "tiefling": Tiefling()}
 
-    def __init__(self, x, y, name, race, xp, level, hp, archetype, half_elf_choice_1, half_elf_choice_2,
-                 strength, dexterity, constitution, intelligence, wisdom, charisma, skills=None):
+    def __init__(self, x, y, name, race, xp, level, hp, archetype, strength, dexterity, constitution, intelligence,
+                 wisdom, charisma, skills=None):
         self.x = x
         self.y = y
         self.name = name
@@ -14,8 +17,7 @@ class BaseCharacter:
         self.xp = xp
         self.level = level
         self.hp = hp
-        self.half_elf_choice_1 = half_elf_choice_1
-        self.half_elf_choice_2 = half_elf_choice_2
+
         self.base_strength = strength
         self.base_dexterity = dexterity
         self.base_constitution = constitution
@@ -23,19 +25,12 @@ class BaseCharacter:
         self.base_wisdom = wisdom
         self.base_charisma = charisma
 
-        self.racial_str_bonus = get_racial_bonus(race, "strength")
-        self.racial_dex_bonus = get_racial_bonus(race, "dexterity")
-        self.racial_const_bonus = get_racial_bonus(race, "constitution")
-        self.racial_int_bonus = get_racial_bonus(race, "intelligence")
-        self.racial_wis_bonus = get_racial_bonus(race, "wisdom")
-        self.racial_char_bonus = get_racial_bonus(race, "charisma")
-
-        self.strength = self.base_strength + self.racial_str_bonus
-        self.dexterity = self.base_dexterity + self.racial_dex_bonus
-        self.constitution = self.base_constitution + self.racial_const_bonus
-        self.intelligence = self.base_intelligence + self.racial_int_bonus
-        self.wisdom = self.base_wisdom + self.racial_wis_bonus
-        self.charisma = self.base_charisma + self.racial_char_bonus
+        self.strength = self.base_strength + self.races_dict[race.lower()].racial_str_bonus
+        self.dexterity = self.base_dexterity + self.races_dict[race.lower()].racial_dex_bonus
+        self.constitution = self.base_constitution + self.races_dict[race.lower()].racial_const_bonus
+        self.intelligence = self.base_intelligence + self.races_dict[race.lower()].racial_int_bonus
+        self.wisdom = self.base_wisdom + self.races_dict[race.lower()].racial_wis_bonus
+        self.charisma = self.base_charisma + self.races_dict[race.lower()].racial_char_bonus
 
         self.archetype = archetype
         self.skills = skills
@@ -84,26 +79,20 @@ class BaseCharacter:
     @classmethod
     def generate_player_character(cls):
         assigned = {}
-        half_elf_choice_1 = None
-        half_elf_choice_2 = None
         # Get player character's name
         print("Every adventurer needs a name. How would you like to be known?")
         cls.name = input("Name: ")
 
         # get character's race
         print("What race are you?")
-        print(", ".join(races_constant))
+        print(cls.races_dict.values())
         cls.race = input("Race: ")
-        if cls.race.capitalize() not in races_constant:
-            print("I'm not familiar with that race. Pick from " + ", ".join(races_constant))
+        while cls.race.lower() not in cls.races_dict:
+            print("I'm not familiar with that race. Pick from:")
+            print(cls.races_dict.values())
             print("Who are your people?")
             cls.race = input("Race: ")
-        if cls.race.capitalize() == "Half-Elf":
-            print("Half-Elves get a bonus to Charisma and two other stats of their choice. "
-                  "What stats would you like to enhance -- Strength, Dexterity, Constitution, Intelligence, or Wisdom?")
-            half_elf_choice_1 = input("Choice 1:")
-            half_elf_choice_2 = input("Choice 2:")
-
+            cls.races_dict[cls.race].build()
         # get class (variable is named archetype because 'class' is a reserved word in Python)
         print("What kind of an adventurer are you--Rogue, Cleric, Wizard, Ranger, Paladin, Barbarian?")
         cls.archetype = input("Class: ")
@@ -120,107 +109,92 @@ class BaseCharacter:
 
                 # Player chose computer rolls
                 print("One moment while I roll the dice and calculate your scores.")
-                for s in cls.stats:
-                    results = []
-                    for d in range(4):
-                        roll = randint(1, 6)
-                        results.append(roll)
-                    if len(results) == 4:
-                        results.remove(min(results))
-                    assigned[s] = sum(results)
+                assigned = cls.stats_rolled()
 
-            # Player chose manual rolls
             elif rolls in ["2", "manual", "manual entry"]:
-                stats = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]
-                print("Roll 4 d6 and add the three highest rolls. Do this 6 times, and jot down the numbers.")
-                for stat in stats:
-                    print("What did you roll for %s " % stat)
-                    val = int(input("? "))
-                    assigned[stat] = val
+                # Player chose manual rolls
+                assigned = cls.stats_manual_entry()
 
-        # Player chose Standard array
         elif stats_choice in ['b', "b"]:
-            print("With the standard array, you get these scores to distribute as you see fit: ")
-            print("15, 14, 13, 12, 10, 8")
-            values = [15, 14, 13, 12, 10, 8]
-            stats = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]
-            assigned = {}
-            for s in stats:
-                print("Which score would you like to assign to {}? ".format(s))
-                value = input()
-                assigned[s] = value
-                values.remove(int(value))
-                print("Remaining values: " + str(list(values)))
-        return cls(0, 0, cls.name, cls.race, half_elf_choice_1, half_elf_choice_2, 0, 1, 0, cls.archetype, **assigned)
+            # Player chose Standard array
+            assigned = cls.stats_standard_array()
+
+        return cls(0, 0, cls.name, cls.race, 0, 1, 0, cls.archetype, **assigned)
+
+    @classmethod
+    def stats_rolled(cls):
+        assigned = {}
+        for s in cls.stats:
+            results = []
+            for d in range(4):
+                roll = randint(1, 6)
+                results.append(roll)
+            if len(results) == 4:
+                results.remove(min(results))
+            assigned[s] = sum(results)
+        return assigned
+
+    @classmethod
+    def stats_manual_entry(cls):
+        assigned = {}
+        print("Roll 4 d6 and add the three highest rolls. Do this 6 times, and jot down the numbers.")
+        for stat in cls.stats:
+            print("What did you roll for %s " % stat)
+            val = int(input("? "))
+            assigned[stat] = val
+        return assigned
+
+    @classmethod
+    def stats_standard_array(cls):
+        print("With the standard array, you get these scores to distribute as you see fit: ")
+        print("15, 14, 13, 12, 10, 8")
+        values = [15, 14, 13, 12, 10, 8]
+        stats = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]
+        assigned = {}
+        for s in stats:
+            print("Which score would you like to assign to {}? ".format(s))
+            value = input()
+            assigned[s] = value
+            values.remove(int(value))
+            print("Remaining values: " + str(list(values)))
+        return assigned
 
     @classmethod
     def determine_modifiers(cls, stat):
         stat = stat
         cls.stat_modifier = 0
-        if stat >= 30:
-            cls.stat_modifier = +10
-        elif stat in [28, 29]:
-            cls.stat_modifier = +9
-        elif stat in [26, 27]:
-            cls.stat_modifier = +8
-        elif stat in [24, 25]:
-            cls.stat_modifier = +7
-        elif stat in [22, 23]:
-            cls.stat_modifier = +6
-        elif stat in [20, 21]:
-            cls.stat_modifier = +5
-        elif stat in [18, 19]:
-            cls.stat_modifier = +4
-        elif stat in [16, 17]:
-            cls.stat_modifier = +3
-        elif stat in [14, 15]:
-            cls.stat_modifier = +2
-        elif stat in [12, 13]:
-            cls.stat_modifier = +1
-        elif stat in [10, 11]:
-            cls.stat_modifier = 0
-        elif stat in [8, 9]:
-            cls.stat_modifier = -1
-        elif stat in [6, 7]:
-            cls.stat_modifier = -2
-        elif stat in [4, 5]:
-            cls.stat_modifier = -3
-        elif stat in [2, 3]:
-            cls.stat_modifier = -4
-        else:
-            cls.stat_modifier = -5
+        cls.stat_modifier = (stat-10) // 2
         return cls.stat_modifier
 
-    @classmethod
-    def determine_saving_throws(cls):
+    def determine_saving_throws(self):
         pass
 
     def __repr__(self):
         return f"""Character Stats
-        Name:   {self.name.capitalize()}
-        Race:   {self.race.capitalize()}
-        Class:  {self.archetype.capitalize()}
+            Name:   {self.name.capitalize()}
+            Race:   {self.race.capitalize()}
+            Class:  {self.archetype.capitalize()}
 
-        STR:    {self.base_strength} + {self.racial_str_bonus} = {self.strength}
-        DEX:    {self.base_dexterity} + {self.racial_dex_bonus} = {self.dexterity}
-        CONST:  {self.base_constitution} + {self.racial_const_bonus} = {self.constitution}
-        INT:    {self.base_intelligence} + {self.racial_int_bonus} = {self.intelligence}
-        WIS:   {self.base_wisdom} + {self.racial_wis_bonus} = {self.wisdom}
-        CHAR:   {self.base_charisma} + {self.racial_char_bonus} = {self.charisma}
+            STR:    {self.base_strength} + {self.races_dict[self.race.lower()].racial_str_bonus} = {self.strength}
+            DEX:    {self.base_dexterity} + {self.races_dict[self.race.lower()].racial_dex_bonus} = {self.dexterity}
+            CONST:  {self.base_constitution} + {self.races_dict[self.race.lower()].racial_const_bonus} = {self.constitution}
+            INT:    {self.base_intelligence} + {self.races_dict[self.race.lower()].racial_int_bonus} = {self.intelligence}
+            WIS:   {self.base_wisdom} + {self.races_dict[self.race.lower()].racial_wis_bonus} = {self.wisdom}
+            CHAR:   {self.base_charisma} + {self.races_dict[self.race.lower()].racial_char_bonus} = {self.charisma}
 
-        Racial Bonuses
-        STR bonus:      {self.racial_str_bonus}
-        DEX bonus:      {self.racial_dex_bonus}
-        CONST bonus:    {self.racial_const_bonus}
-        INT bonus:      {self.racial_int_bonus}
-        WIS bonus:     {self.racial_wis_bonus}
-        CHAR bonus:     {self.racial_char_bonus}
+            Racial Bonuses
+            STR bonus:      {self.races_dict[self.race.lower()].racial_str_bonus}
+            DEX bonus:      {self.races_dict[self.race.lower()].racial_dex_bonus}
+            CONST bonus:    {self.races_dict[self.race.lower()].racial_const_bonus}
+            INT bonus:      {self.races_dict[self.race.lower()].racial_int_bonus}
+            WIS bonus:     {self.races_dict[self.race.lower()].racial_wis_bonus}
+            CHAR bonus:     {self.races_dict[self.race.lower()].racial_char_bonus}
 
-        Skill Check Modifiers
-        STR:    {self.strength_modifier}
-        DEX:    {self.dexterity_modifier}
-        CONST:  {self.constitution_modifier}
-        INT:    {self.intelligence_modifier}
-        WIS:    {self.wisdom_modifier}
-        CHAR:   {self.charisma_modifier}        
-"""
+            Skill Check Modifiers
+            STR:    {self.strength_modifier}
+            DEX:    {self.dexterity_modifier}
+            CONST:  {self.constitution_modifier}
+            INT:    {self.intelligence_modifier}
+            WIS:    {self.wisdom_modifier}
+            CHAR:   {self.charisma_modifier}        
+    """
