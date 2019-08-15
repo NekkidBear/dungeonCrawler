@@ -20,6 +20,7 @@ class Race:
         self.racial_const_bonus = 0
         self.racial_wis_bonus = 0
         self.racial_char_bonus = 0
+        self.movement_speed = 30
 
     @classmethod
     def build(cls):
@@ -40,6 +41,7 @@ class Dwarf(Race):
         super().__init__(self)
         self.name = "Dwarf"
         self.racial_const_bonus = +2
+        self.movement_speed = 25
 
 
 class Elf(Race):
@@ -54,6 +56,7 @@ class Gnome(Race):
         super().__init__(self)
         self.name = "Gnome"
         self.racial_int_bonus = +2
+        self.movement_speed = 25
 
 
 class HalfElf(Race):
@@ -94,6 +97,7 @@ class Halfling(Race):
         super().__init__(self)
         self.name = "Halfling"
         self.racial_dex_bonus = +2
+        self.movement_speed = 25
 
 
 class HalfOrc(Race):
@@ -114,6 +118,7 @@ class Human(Race):
         self.racial_const_bonus = +1
         self.racial_wis_bonus = +1
         self.racial_char_bonus = +1
+        self.movement_speed = 30
 
 
 class Tiefling(Race):
